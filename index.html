@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>拾光回响 | Ethereal Echoes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;500;900&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --accent: #e5c38c; --bg: #050508; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg); color: #fff; font-family: 'Noto Serif SC', serif; }
+        
+        #canvas-container { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+        #ui-overlay { position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column; justify-content: space-between; pointer-events: none; padding: 40px; }
+        
+        .header { display: flex; justify-content: space-between; align-items: flex-start; opacity: 0; transition: 2s; }
+        .header.visible { opacity: 1; }
+        .brand { writing-mode: vertical-rl; letter-spacing: 0.5em; font-family: 'Cinzel', serif; color: var(--accent); border-right: 1px solid var(--accent); padding-right: 10px; }
+        
+        .narrative-card { max-width: 500px; pointer-events: auto; opacity: 0; transform: translateY(30px); transition: 1.5s cubic-bezier(0.2, 1, 0.3, 1); filter: blur(10px); }
+        .narrative-card.active { opacity: 1; transform: translateY(0); filter: blur(0); }
+        
+        .chapter-tag { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--accent); margin-bottom: 15px; display: block; }
+        .title { font-size: 2.2rem; margin-bottom: 20px; background: linear-gradient(to right, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.2; }
+        .body-text { font-size: 1rem; line-height: 2; color: rgba(255,255,255,0.7); margin-bottom: 40px; text-align: justify; }
+        
+        .controls { display: flex; gap: 15px; }
+        .btn { background: none; border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 15px 25px; cursor: pointer; transition: 0.4s; font-family: inherit; font-size: 0.8rem; letter-spacing: 0.2em; border-radius: 2px; }
+        .btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(229, 195, 140, 0.05); }
+        .btn-main { background: var(--accent); color: #000; border: none; font-weight: 700; }
+        .btn-main:hover { background: #fff; color: #000; }
+
+        #ai-layer { position: fixed; inset: 0; z-index: 100; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); opacity: 0; pointer-events: none; transition: 0.8s; }
+        #ai-layer.visible { opacity: 1; pointer-events: auto; }
+        .ai-quote-text { font-size: 1.4rem; color: var(--accent); margin-bottom: 40px; text-align: center; padding: 0 40px; line-height: 1.8; font-weight: 200; }
+
+        .loader { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; justify-content: center; align-items: center; transition: 1.2s cubic-bezier(0.7, 0, 0.3, 1); }
+        .loader.hidden { opacity: 0; pointer-events: none; transform: scale(1.1); }
+        .loader-text { color: var(--accent); letter-spacing: 1em; font-family: 'Cinzel', serif; font-size: 0.8rem; animation: pulse 2s infinite; }
+        
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+
+        @media (max-width: 600px) {
+            #ui-overlay { padding: 30px 20px; }
+            .title { font-size: 1.8rem; }
+            .body-text { font-size: 0.9rem; }
+            .btn { padding: 12px 20px; font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+    <div id="loader" class="loader"><div class="loader-text">SYNCING...</div></div>
+    
+    <div id="ai-layer">
+        <div style="text-align: center; max-width: 600px;">
+            <div id="ai-text" class="ai-quote-text">正在打捞时空的碎片...</div>
+            <button class="btn" onclick="document.getElementById('ai-layer').classList.remove('visible')">收起余音</button>
+        </div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <div id="ui-overlay">
+        <header class="header" id="header">
+            <div class="brand">拾光回响</div>
+            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.3); text-align: right; letter-spacing: 0.2em;">
+                FRAGMENTS<br>OF TIME
+            </div>
+        </header>
+        
+        <main class="content-frame">
+            <article id="card" class="narrative-card">
+                <span id="chap-num" class="chapter-tag">YEAR 01</span>
+                <h1 id="chap-title" class="title"></h1>
+                <p id="chap-content" class="body-text"></p>
+                <div class="controls">
+                    <button class="btn" id="ai-btn">拾取余音</button>
+                    <button class="btn btn-main" id="next-btn">溯流而上</button>
+                </div>
+            </article>
+        </main>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "@google/genai": "https://esm.sh/@google/genai@1.3.0"
+        }
+    }
+    </script>
+    <script type="module" src="index.js"></script>
+</body>
+</html>
